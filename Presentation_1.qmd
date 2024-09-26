@@ -1,0 +1,102 @@
+---
+title: "Arrange, Slice, Slice_Max"
+format: html
+editor: visual
+Author: Dean, Aiden, Cade
+---
+
+```{r}
+#| echo: false
+#| warning: false
+#| message: false
+
+library(dplyr)
+library(knitr)
+library(lubridate)
+
+stream_gauge <- read.csv("/cloud/project/activtiy02/stream_gauge.csv")
+
+site_info <- read.csv("/cloud/project/activtiy02/site_info.csv")
+
+
+stream_gauge$dateF <- ymd_hm(stream_gauge$datetime,
+                          tz = 'America/New_York')
+
+floods <- full_join(stream_gauge,site_info, by = "siteID")
+
+```
+
+## Arrange
+
+The arrange function allows us to order the rows of our data set according to the values of a specified column. See this basic example using the 'iris' data set:
+
+Here we organize the rows of the data set according the value of Sepal.Length:
+
+```{r}
+
+# Examine the data
+iris %>% head(5)
+
+# Arrange according to Sepal.Length in descending order
+
+iris %>% arrange(desc(Sepal.Length)) %>% head(5)
+
+# Arranging in ascending order
+
+iris %>% arrange(Sepal.Length) %>% head(5)
+```
+
+We can now apply the arrange function to organize the rows of our 'floods' data according to the value of gauge height. Doing so in descending order we would attain:
+
+```{r}
+
+# Arranging in descending order 
+
+tibble <- arrange(floods, desc(gheight.ft)) %>% head(5)
+
+as_tibble(tibble)
+```
+
+## Slice
+
+The slice function allows a user to select rows according to their integer location. The following is a basic example using the iris data set.
+
+```{r}
+
+# Showing the first row of the iris data set
+
+iris %>% slice(1)
+
+# Showing the first five rows of the data set 
+
+slice(iris, (1:5))
+
+# Not showing the first five rows of the data set
+
+slice(iris, -(1:5)) %>% head(5)
+```
+
+Using Slice in our floods data set, we can eliminate the rows between 5 and 10.
+
+```{r}
+
+floods_tibble <- floods %>% head(10)
+as_tibble(floods_tibble)
+
+sliced_floods_tibble <- slice(floods,-(5:10)) %>% head(10)
+as_tibble(sliced_floods_tibble)
+```
+
+## Slice Max
+
+Slice max allows us to display the rows of a data set according to the maximum values of a variable (column). For our floods data, we can isolate the observations with the highest gauge height using the following code:
+
+```{r}
+
+floods_max <- floods %>% slice_max(gheight.ft, n = 10)
+as_tibble(floods_max)
+
+max_gauges <- floods %>% group_by(names) %>% slice_max(gheight.ft)
+as_tibble(max_gauges)
+
+```
